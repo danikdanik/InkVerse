@@ -56,13 +56,13 @@ describe('demo episode fixtures', () => {
     expect(move?.toHolder).toBe('guardian');
   });
 
-  it('knowledge gates later choices: beat-4 requires facts or trust from its route', () => {
-    const g4 = EPISODE.beats.find((b) => b.key === 'gate-4')!;
-    const gFuture = g4.response.choices.find((c) => c.id === 'g4-future')!;
+  it('knowledge gates the payoff choices: beat-7 requires facts or trust from its route', () => {
+    const g7 = EPISODE.beats.find((b) => b.key === 'gate-7')!;
+    const gFuture = g7.response.choices.find((c) => c.id === 'g7-future')!;
     expect(gFuture.requires.facts.length).toBeGreaterThan(0);
 
-    const gd4 = EPISODE.beats.find((b) => b.key === 'guardian-4')!;
-    const gdPast = gd4.response.choices.find((c) => c.id === 'gd4-past')!;
+    const gd7 = EPISODE.beats.find((b) => b.key === 'guardian-7')!;
+    const gdPast = gd7.response.choices.find((c) => c.id === 'gd7-past')!;
     expect(gdPast.requires.minTrust?.characterId).toBe('guardian');
     expect(gdPast.requires.minTrust?.trust).toBeGreaterThanOrEqual(1);
   });

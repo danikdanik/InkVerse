@@ -378,14 +378,14 @@ const beats: FixtureBeat[] = [
     art: art('gate-4', ['p0']),
     response: {
       beat: {
-        title: 'The Choice at the Gate',
+        title: 'Deeper Than the Index',
         narration:
-          'Both doors, today’s and tomorrow’s, hang before her. The archive’s record says the future ' +
-          'page is the connection being lost. She can knit the timelines back to it, or cut them apart for good.',
-        pacing: 'complication', layoutTemplate: 'single-splash',
+          'Two doors, sealed and open, shimmer in the seam. But the archive is not finished with her: the index tugs ' +
+          'downward, insisting there is a lower shelf where tomorrow is still being written by hand.',
+        pacing: 'discovery', layoutTemplate: 'single-splash',
       },
       stateDelta: D({
-        addThreads: ['Neri must decide whether to repair the future or sever the citadel.'],
+        addThreads: ['The archive is not finished writing tomorrow.'],
       }),
       panels: [
         P({
@@ -398,23 +398,181 @@ const beats: FixtureBeat[] = [
             'Two overlapping doorways shimmer in a seam of light, one sealed and one open, their outlines not quite ' +
             'aligned. Neri stands centered, facing the viewer, holding the recovered map page, her teal scarf lifting ' +
             'in the draft from the seam. Quiet space above for lettering.',
-          bubbles: [SP('neri', 'Repair the future, or cut it loose.', B_BOT, { x: 0.42, y: 0.55 })],
+          bubbles: [SP('neri', 'The record isn’t finished.', B_BOT, { x: 0.42, y: 0.55 })],
           alt: 'Neri stands holding a map page between two overlapping glowing doorways, one sealed and one open.',
           motion: M('energy_pulse', { intensity: 0.34, zoomEnd: 1.03 }),
         }),
       ],
       choices: [
         C({
-          id: 'g4-future', label: 'Repair the future', intent: 'Use the archived page to knit the timelines back together.',
-          panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.24, h: 0.44 }, hint: 'Restore the link', facts: [FACT_ARCHIVE],
+          id: 'g4-descend', label: 'Descend to the deeper shelf', intent: 'Follow the tugging index down to where tomorrow is still being written.',
+          panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.24, h: 0.44 }, hint: 'Go deeper',
         }),
         C({
-          id: 'g4-sever', label: 'Sever the citadel', intent: 'Cut the two timelines apart and let the citadel drift free.',
+          id: 'g4-listen', label: 'Reread the lost-page record', intent: 'Study the archived lost-page entry once more before descending.',
+          panelId: 'p0', rect: { x: 0.2, y: 0.32, w: 0.22, h: 0.42 }, hint: 'Reread it', facts: [FACT_ARCHIVE],
+        }),
+      ],
+      continuityNotes: ['The archive is still writing tomorrow; the deeper shelf pulls Neri down.'],
+      summaryUpdate: 'At the seam the archive keeps pulling; Neri descends toward the deeper shelf where tomorrow is still being written.',
+    },
+  },
+  {
+    key: 'gate-5', parentKey: 'gate-4', via: { kind: 'choice', choiceId: 'g4-descend' },
+    art: art('root', ['p0', 'p1']),
+    response: {
+      beat: {
+        title: 'Where Tomorrow Is Written',
+        narration:
+          'The deeper shelf is a writing-room. Index cards fill themselves with tomorrow’s entries, inked by a hand ' +
+          'no one is holding. Each new line names something the citadel is about to lose.',
+        pacing: 'discovery', layoutTemplate: 'duo-stack',
+      },
+      stateDelta: D({
+        location: 'The deeper archive',
+        addFacts: ['Tomorrow’s archive entries are being written now by an unseen hand.'],
+        addThreads: ['Something writes tomorrow before it happens.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', slot: 0, action: 'Neri and the archivist float in a deeper vault where cards write themselves in midair.',
+          present: ['neri', 'archivist'], sketch: 'archive', shot: 'wide', view: 'eye-level',
+          subjects: [
+            { characterId: 'neri', at: { x: 0.3, y: 0.62 }, facing: 'right' },
+            { characterId: 'archivist', at: { x: 0.7, y: 0.42 }, facing: 'left' },
+          ],
+          focal: { x: 0.6, y: 0.46 }, keyProp: 'a self-writing index card', aspect: '16:9', palette: P_ARCHIVE,
+          bg: 'A deeper vault of turning shelves; cards hover and fill with fresh ink in the dark.',
+          brief:
+            'A deep archive vault seen wide: rings of shelves recede into blue dark around the faceless lantern keeper. ' +
+            'Small index cards hover in the air, each filling with a line of fresh ink as if written by an invisible ' +
+            'hand. Neri floats among them in mustard and teal, watching.',
+          bubbles: [SP('archivist', 'Tomorrow is written here, before it arrives.', B_TOPL, { x: 0.7, y: 0.42 })],
+          alt: 'Neri and a faceless lantern float in a deep archive where index cards write themselves in midair.',
+          motion: M('slow_push', { zoomEnd: 1.03, intensity: 0.24 }),
+        }),
+        P({
+          id: 'p1', slot: 1, action: 'Close on a single card as a line of ink appears, naming Neri’s map among tomorrow’s losses.',
+          present: [], sketch: 'map', shot: 'close-up', view: 'top-down',
+          focal: { x: 0.5, y: 0.48 }, keyProp: 'the self-writing card', aspect: '16:9', palette: P_ARCHIVE,
+          bg: 'One index card lit in a shaft of light, ink crawling across it line by line.',
+          brief:
+            'Top-down close view of a single index card lit in a shaft of pale light. A line of dark ink crawls across ' +
+            'it on its own, forming words, the newest entry among a stack of tomorrow’s losses. No hand is visible.',
+          bubbles: [CAP('The newest line is her own map.', B_BOT)],
+          alt: 'Close view of an index card as a line of ink writes itself across it with no hand present.',
+          motion: M('energy_pulse', { intensity: 0.3, zoomEnd: 1.03 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'g5-next', label: 'Chase the unseen hand', intent: 'Follow the writing back toward today and the sealed door.',
+          panelId: 'p0', rect: { x: 0.58, y: 0.3, w: 0.3, h: 0.4 }, hint: 'Follow the ink',
+        }),
+        C({
+          id: 'g5-read', label: 'Read tomorrow’s entry', intent: 'Study the self-writing entry naming the lost page.',
+          panelId: 'p1', rect: { x: 0.3, y: 0.3, w: 0.4, h: 0.4 }, hint: 'Read the card', facts: [FACT_ARCHIVE],
+        }),
+      ],
+      continuityNotes: ['The archive writes tomorrow before it happens.'],
+      summaryUpdate: 'Deeper in the archive, Neri finds tomorrow’s entries written by an unseen hand; the newest names her own map.',
+    },
+  },
+  {
+    key: 'gate-6', parentKey: 'gate-5', via: { kind: 'choice', choiceId: 'g5-next' },
+    art: art('root', ['p0']),
+    response: {
+      beat: {
+        title: 'The Erasing of Today',
+        narration:
+          'Chasing the ink back, Neri feels today thinning behind her. In her satchel the map is going blank, ' +
+          'coastlines lifting off the paper the way the archive lifts what it records.',
+        pacing: 'complication', layoutTemplate: 'single-splash',
+      },
+      stateDelta: D({
+        pacing: 'complication',
+        addFacts: ['The archive has begun to erase today; Neri’s own map is fading from her satchel.'],
+        addThreads: ['If the erasing finishes, there will be no today for the door to open onto.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', action: 'Neri holds her own map as its inked coastlines lift and dissolve into drifting motes.',
+          present: ['neri'], sketch: 'map', shot: 'medium', view: 'over-shoulder',
+          subjects: [{ characterId: 'neri', at: { x: 0.34, y: 0.62 }, facing: 'right' }],
+          focal: { x: 0.58, y: 0.46 }, keyProp: 'Neri’s fading map', aspect: '3:2', palette: P_ARCHIVE,
+          bg: 'The archive edge where the vault meets the fading courtyard of today.',
+          brief:
+            'Over Neri’s shoulder: she holds her unrolled map in both hands as its inked coastlines lift off the paper ' +
+            'and dissolve into drifting motes of light. Behind her the courtyard of today thins to pale nothing. She is ' +
+            'in mustard and teal, alarmed but steady.',
+          bubbles: [SP('neri', 'It’s taking today too.', B_BOT, { x: 0.4, y: 0.55 })],
+          alt: 'Neri holds her map as its coastlines lift off the paper and dissolve while the scene behind her fades.',
+          motion: M('drifting_dust', { intensity: 0.3, zoomEnd: 1.03, particleCount: 16 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'g6-next', label: 'Race to the seam', intent: 'Reach the seam before today is fully erased.',
+          panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.28, h: 0.4 }, hint: 'Hurry to the seam',
+        }),
+        C({
+          id: 'g6-hold', label: 'Redraw one coastline', intent: 'Try to hold the fading map by re-inking what the archive named lost.',
+          panelId: 'p0', rect: { x: 0.1, y: 0.36, w: 0.24, h: 0.3 }, hint: 'Redraw it', facts: [FACT_ARCHIVE],
+        }),
+      ],
+      continuityNotes: ['Today is being erased; Neri’s map is fading.'],
+      summaryUpdate: 'Racing back, Neri finds the archive erasing today; her own map begins to dissolve from her satchel.',
+    },
+  },
+  {
+    key: 'gate-7', parentKey: 'gate-6', via: { kind: 'choice', choiceId: 'g6-next' },
+    art: art('root', ['p0']),
+    response: {
+      beat: {
+        title: 'The Archivist’s Bargain',
+        narration:
+          'At the seam the archivist waits, holding the lost page like a lantern. It will give the page back, it says, ' +
+          'for a single memory to keep in its place. Repair the future, or let the seam finish and drift free.',
+        pacing: 'payoff', layoutTemplate: 'single-splash',
+      },
+      stateDelta: D({
+        location: 'The seam at the gate', pacing: 'payoff',
+        addThreads: ['Neri must trade a memory for the lost page to repair the future, or sever the citadel.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', action: 'The archivist extends the recovered page across the seam; Neri weighs the trade.',
+          present: ['neri', 'archivist'], sketch: 'archive', shot: 'medium', view: 'eye-level',
+          subjects: [
+            { characterId: 'neri', at: { x: 0.32, y: 0.62 }, facing: 'right' },
+            { characterId: 'archivist', at: { x: 0.68, y: 0.44 }, facing: 'left' },
+          ],
+          focal: { x: 0.55, y: 0.46 }, keyProp: 'the recovered lost page', aspect: '3:2', palette: P_ARCHIVE,
+          bg: 'A bright seam of light; the faceless lantern holds a single glowing page across it.',
+          brief:
+            'At a vertical seam of light, the faceless lantern-keeper extends a single glowing map page toward Neri. ' +
+            'She stands in mustard and teal, one hand half-raised, weighing whether to take it. Quiet dark space above ' +
+            'for lettering.',
+          bubbles: [
+            SP('archivist', 'The page, for one memory to keep.', B_TOPL, { x: 0.68, y: 0.44 }),
+            SP('neri', 'A fair trade, or a trap.', B_BOT, { x: 0.32, y: 0.6 }),
+          ],
+          alt: 'A faceless lantern holds out a glowing map page across a seam of light while Neri weighs whether to take it.',
+          motion: M('energy_pulse', { intensity: 0.32, zoomEnd: 1.03 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'g7-future', label: 'Repair the future', intent: 'Trade a memory for the lost page and knit the timelines back together.',
+          panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.24, h: 0.44 }, hint: 'Take the page', facts: [FACT_ARCHIVE],
+        }),
+        C({
+          id: 'g7-sever', label: 'Sever the citadel', intent: 'Refuse the trade and let the seam finish, cutting the timelines apart.',
           panelId: 'p0', rect: { x: 0.2, y: 0.32, w: 0.22, h: 0.42 }, hint: 'Cut them apart',
         }),
       ],
       continuityNotes: ['Repairing the future requires the archived lost-page fact.'],
-      summaryUpdate: 'At the seam Neri weighs repairing the future against severing the citadel; the archived page is the key to repair.',
+      summaryUpdate: 'At the seam the archivist offers the lost page for a memory; Neri must repair the future or sever the citadel.',
     },
   },
 
@@ -574,14 +732,14 @@ const beats: FixtureBeat[] = [
     art: art('guardian-4', ['p0']),
     response: {
       beat: {
-        title: 'The Choice at the Door',
+        title: 'The Door’s Other Face',
         narration:
-          'To repair the past, Neri must give the citadel a true memory to hold, and trust the guardian to keep it. ' +
-          'Or she can let the door stay shut and walk back the way she came.',
-        pacing: 'complication', layoutTemplate: 'single-splash',
+          'Neri lifts her hand to the fading carving, but the guardian closes its own hand over hers. Before she trades ' +
+          'anything away, it says, she should see the door’s other face, the one that already opened in the second timeline.',
+        pacing: 'discovery', layoutTemplate: 'single-splash',
       },
       stateDelta: D({
-        addThreads: ['Neri must decide whether to entrust her memory to the guardian.'],
+        addThreads: ['The door wears a second face in the other timeline.'],
       }),
       panels: [
         P({
@@ -597,24 +755,186 @@ const beats: FixtureBeat[] = [
             'Neri raises her open hand toward the sealed door where her carved face has nearly vanished. The guardian ' +
             'stands close, amber eye steady, waiting. A faint cyan light gathers at Neri’s palm. Quiet space above ' +
             'for lettering.',
-          bubbles: [SP('neri', 'Keep this one for me.', B_BOT, { x: 0.42, y: 0.55 })],
+          bubbles: [SP('guardian', 'See its other face first.', B_TOPR, { x: 0.72, y: 0.42 })],
           alt: 'Neri raises a glowing hand toward a sealed door beside the waiting stone guardian.',
           motion: M('energy_pulse', { intensity: 0.3, zoomEnd: 1.03 }),
         }),
       ],
       choices: [
         C({
-          id: 'gd4-past', label: 'Repair the past', intent: 'Entrust a true memory to the guardian so the citadel remembers you.',
+          id: 'gd4-descend', label: 'See the other face', intent: 'Follow the guardian to the door’s second-timeline face before deciding.',
+          panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.26, h: 0.44 }, hint: 'Follow the guardian',
+        }),
+        C({
+          id: 'gd4-hold', label: 'Ask what it still holds', intent: 'Ask the guardian to recount what it remembers of you.',
+          panelId: 'p0', rect: { x: 0.08, y: 0.4, w: 0.22, h: 0.3 }, hint: 'Ask it', minTrust: { characterId: 'guardian', trust: 1 },
+        }),
+      ],
+      continuityNotes: ['The guardian offers to show the door’s second face.'],
+      summaryUpdate: 'Before Neri gives a memory, the guardian offers to show the door’s other face in the second timeline.',
+    },
+  },
+  {
+    key: 'guardian-5', parentKey: 'guardian-4', via: { kind: 'choice', choiceId: 'gd4-descend' },
+    art: art('root', ['p0', 'p1']),
+    response: {
+      beat: {
+        title: 'The Face That Opened',
+        narration:
+          'The guardian turns the door on its hinge of years. Its other face belongs to the second timeline, where ' +
+          'the carving of Neri is not fading but bright, and the door already stands open for her.',
+        pacing: 'discovery', layoutTemplate: 'duo-side',
+      },
+      stateDelta: D({
+        addFacts: ['In the second timeline the door already opened for Neri; there her carved face is bright, not fading.'],
+        addThreads: ['Two yesterdays hold two versions of the same door.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', slot: 0, action: 'The guardian turns the great door to show its second face to Neri.',
+          present: ['neri', 'guardian'], sketch: 'door', shot: 'medium', view: 'low-angle',
+          subjects: [
+            { characterId: 'guardian', at: { x: 0.66, y: 0.5 }, facing: 'left' },
+            { characterId: 'neri', at: { x: 0.3, y: 0.64 }, facing: 'right' },
+          ],
+          focal: { x: 0.55, y: 0.46 }, keyProp: 'the turning door', aspect: '4:3', palette: P_GUARDIAN,
+          bg: 'The sealed door swinging on a deep hinge to reveal a second face beyond it.',
+          brief:
+            'Low angle: the stone guardian pushes the tall door on a deep hinge, turning it to reveal a second face of ' +
+            'the same door. Neri, small in mustard and teal, watches from below. Warm amber light on cracked basalt, ' +
+            'cool stone beyond.',
+          bubbles: [SP('guardian', 'Its other face never closed.', B_TOPR, { x: 0.66, y: 0.42 })],
+          alt: 'The stone guardian turns a great door to show a second face while Neri watches from below.',
+          motion: M('slow_push', { intensity: 0.24, zoomEnd: 1.03 }),
+        }),
+        P({
+          id: 'p1', slot: 1, action: 'The second-timeline door stands open, Neri’s carved face bright and whole in the stone.',
+          present: [], sketch: 'door', shot: 'medium', view: 'eye-level',
+          focal: { x: 0.5, y: 0.44 }, keyProp: 'the open second door', aspect: '3:4', palette: P_DOOR,
+          bg: 'A tall open doorway spilling warm light, a bright carved face in the lintel.',
+          brief:
+            'A tall narrow view of an open doorway in the second timeline, warm light spilling through. Above it, ' +
+            'carved sharp and bright in the stone, is Neri’s own face, whole and unfaded, unlike the vanishing carving ' +
+            'on today’s door.',
+          bubbles: [CAP('There, she is remembered.', B_BOT)],
+          alt: 'A tall open doorway spilling light, a bright carved face of Neri sharp in the stone above it.',
+          motion: M('slow_push', { intensity: 0.22, zoomEnd: 1.03 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'gd5-next', label: 'Turn back to today’s door', intent: 'Return to the fading door and the guardian’s failing memory.',
+          panelId: 'p0', rect: { x: 0.5, y: 0.3, w: 0.28, h: 0.4 }, hint: 'Back to today',
+        }),
+        C({
+          id: 'gd5-scarf', label: 'Point out the teal scarf', intent: 'Show the guardian the carved visitor wore your own scarf.',
+          panelId: 'p1', rect: { x: 0.3, y: 0.3, w: 0.4, h: 0.4 }, hint: 'The scarf', facts: [FACT_SCARF],
+        }),
+      ],
+      continuityNotes: ['The door’s second face opened for Neri in the other timeline.'],
+      summaryUpdate: 'The guardian shows the door’s other face: in the second timeline it already opened for Neri, her carving bright and whole.',
+    },
+  },
+  {
+    key: 'guardian-6', parentKey: 'guardian-5', via: { kind: 'choice', choiceId: 'gd5-next' },
+    art: art('root', ['p0']),
+    response: {
+      beat: {
+        title: 'When the Guardian Forgets',
+        narration:
+          'Back at today’s door the guardian’s amber eye dims. It reaches for Neri’s name and finds a gap. Only the ' +
+          'trust between them keeps her from slipping out of the citadel’s memory entirely.',
+        pacing: 'complication', layoutTemplate: 'single-splash',
+      },
+      stateDelta: D({
+        pacing: 'complication',
+        relationshipChanges: [{ characterId: 'guardian', trustDelta: 1, note: 'Neri steadied the guardian as it began to forget.' }],
+        addFacts: ['The guardian itself is beginning to forget Neri; only its trust in her still holds the memory.'],
+        addThreads: ['If the guardian forgets Neri, no one is left to open the door.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', action: 'The guardian’s amber eye flickers and dims; Neri steadies its cracked hand.',
+          present: ['neri', 'guardian'], sketch: 'guardian', shot: 'close-up', view: 'low-angle',
+          subjects: [
+            { characterId: 'guardian', at: { x: 0.64, y: 0.5 }, facing: 'left' },
+            { characterId: 'neri', at: { x: 0.32, y: 0.64 }, facing: 'right' },
+          ],
+          focal: { x: 0.58, y: 0.44 }, keyProp: 'the dimming amber eye', aspect: '3:2', palette: P_GUARDIAN,
+          bg: 'The sealed door in shadow; the guardian’s eye guttering like a low flame.',
+          brief:
+            'Close and low: the stone guardian’s single amber eye flickers and dims like a guttering flame, moss ' +
+            'greying in its seams. Neri, in mustard and teal, lays both hands on its cracked wrist to steady it. The ' +
+            'sealed door waits dark behind.',
+          bubbles: [
+            SP('guardian', 'Your name… I had it a moment ago.', B_TOPR, { x: 0.64, y: 0.42 }),
+            SP('neri', 'I’m still here. Hold on.', B_BOT, { x: 0.32, y: 0.6 }),
+          ],
+          alt: 'The stone guardian’s amber eye dims while Neri steadies its cracked hand before the sealed door.',
+          motion: M('still', { intensity: 0.18, zoomEnd: 1.02 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'gd6-next', label: 'Face the door together', intent: 'Bring the fading guardian with you to the sealed door.',
+          panelId: 'p0', rect: { x: 0.5, y: 0.3, w: 0.28, h: 0.4 }, hint: 'To the door',
+        }),
+        C({
+          id: 'gd6-steady', label: 'Give the guardian your name', intent: 'Speak your name into the guardian so its trust can hold it.',
+          panelId: 'p0', rect: { x: 0.1, y: 0.36, w: 0.24, h: 0.3 }, hint: 'Say your name', minTrust: { characterId: 'guardian', trust: 1 },
+        }),
+      ],
+      continuityNotes: ['Guardian trust +1 for steadying it.', 'The guardian is starting to forget Neri.'],
+      summaryUpdate: 'Back at today’s door the guardian begins to forget Neri; only their trust holds her memory, and it deepens.',
+    },
+  },
+  {
+    key: 'guardian-7', parentKey: 'guardian-6', via: { kind: 'choice', choiceId: 'gd6-next' },
+    art: art('root', ['p0']),
+    response: {
+      beat: {
+        title: 'Which Yesterday to Keep',
+        narration:
+          'At the door the guardian cups two faint yesterdays in its palm: the day Neri arrived, and the brighter day ' +
+          'it still opened for her. It asks her to choose which one the citadel will keep and hold.',
+        pacing: 'payoff', layoutTemplate: 'single-splash',
+      },
+      stateDelta: D({
+        pacing: 'payoff',
+        addThreads: ['Neri must choose which yesterday the citadel keeps to repair the past.'],
+      }),
+      panels: [
+        P({
+          id: 'p0', action: 'The guardian holds out two faint memories of yesterday; Neri reaches to choose.',
+          present: ['neri', 'guardian'], sketch: 'door', shot: 'medium', view: 'eye-level',
+          subjects: [
+            { characterId: 'neri', at: { x: 0.36, y: 0.62 }, facing: 'right' },
+            { characterId: 'guardian', at: { x: 0.7, y: 0.5 }, facing: 'left' },
+          ],
+          focal: { x: 0.55, y: 0.46 }, keyProp: 'two glowing yesterdays', aspect: '3:2', palette: P_DOOR,
+          bg: 'The sealed door, its carved face nearly gone; two small memories glow in the guardian’s hand.',
+          brief:
+            'The stone guardian opens its cracked hand to show two small glowing memories side by side, two versions ' +
+            'of yesterday. Neri, in mustard and teal, raises her hand toward them, choosing. The sealed door with its ' +
+            'nearly vanished carving waits behind. Quiet space above.',
+          bubbles: [SP('guardian', 'Choose the yesterday to keep.', B_TOPR, { x: 0.7, y: 0.42 })],
+          alt: 'The guardian holds two small glowing memories of yesterday in its hand as Neri reaches to choose.',
+          motion: M('energy_pulse', { intensity: 0.3, zoomEnd: 1.03 }),
+        }),
+      ],
+      choices: [
+        C({
+          id: 'gd7-past', label: 'Repair the past', intent: 'Entrust a true memory to the guardian so the citadel remembers you.',
           panelId: 'p0', rect: { x: 0.55, y: 0.3, w: 0.26, h: 0.44 }, hint: 'Give the memory',
           minTrust: { characterId: 'guardian', trust: 1 },
         }),
         C({
-          id: 'gd4-wait', label: 'Let the door stay shut', intent: 'Step back and leave the door sealed.',
-          panelId: 'p0', rect: { x: 0.08, y: 0.4, w: 0.22, h: 0.3 }, hint: 'Walk away',
+          id: 'gd7-let', label: 'Let the door stay shut', intent: 'Step back and leave the door sealed, keeping the day you came from.',
+          panelId: 'p0', rect: { x: 0.1, y: 0.36, w: 0.22, h: 0.3 }, hint: 'Walk away',
         }),
       ],
       continuityNotes: ['Repairing the past requires the guardian’s trust (>=1).'],
-      summaryUpdate: 'Neri prepares to entrust a memory to the guardian to make the citadel remember her; this needs the guardian’s trust.',
+      summaryUpdate: 'The guardian asks Neri to choose which yesterday the citadel keeps; entrusting a memory repairs the past.',
     },
   },
 
@@ -721,7 +1041,7 @@ const beats: FixtureBeat[] = [
 
   // ===== ENDINGS =====
   {
-    key: 'ending-repair-future', parentKey: 'gate-4', via: { kind: 'choice', choiceId: 'g4-future' },
+    key: 'ending-repair-future', parentKey: 'gate-7', via: { kind: 'choice', choiceId: 'g7-future' },
     art: art('ending-repair-future', ['p0']),
     response: {
       beat: {
@@ -765,7 +1085,7 @@ const beats: FixtureBeat[] = [
     },
   },
   {
-    key: 'ending-repair-past', parentKey: 'guardian-4', via: { kind: 'choice', choiceId: 'gd4-past' },
+    key: 'ending-repair-past', parentKey: 'guardian-7', via: { kind: 'choice', choiceId: 'gd7-past' },
     art: art('ending-repair-past', ['p0']),
     response: {
       beat: {
@@ -813,7 +1133,7 @@ const beats: FixtureBeat[] = [
     },
   },
   {
-    key: 'ending-sever', parentKey: 'gate-4', via: { kind: 'choice', choiceId: 'g4-sever' },
+    key: 'ending-sever', parentKey: 'gate-7', via: { kind: 'choice', choiceId: 'g7-sever' },
     art: art('ending-sever', ['p0']),
     response: {
       beat: {

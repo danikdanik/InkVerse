@@ -514,6 +514,19 @@ export class Worker {
 
   private fixtureArtFor(node: StoryNode, panelId: string, stage: 'preview' | 'final'): string | undefined {
     if (!node.fixtureKey) return undefined;
+    // Fallback beats (no authored page) are tagged '<parentKey>:custom'. Show the parent's finished
+    // art for their single panel rather than a placeholder: the beat says the moment folds back on itself.
+    if (node.fixtureKey.endsWith(':custom')) {
+      const parentKey = node.fixtureKey.slice(0, -':custom'.length);
+      const parentPng = `${parentKey}-p0-${stage}.png`;
+      if (fs.existsSync(path.join(this.ctx.artRoot, parentPng))) return parentPng;
+      const parentBeat = this.ctx.episode.beats.find((b) => b.key === parentKey);
+      const art = parentBeat?.art?.p0;
+      return art ? (stage === 'final' ? art.final : art.preview) : undefined;
+    }
+    // Prefer a real Runware render produced by `npm run fixtures:art` (PNG next to the authored SVG).
+    const rendered = `${node.fixtureKey}-${panelId}-${stage}.png`;
+    if (fs.existsSync(path.join(this.ctx.artRoot, rendered))) return rendered;
     const beat = this.ctx.episode.beats.find((b) => b.key === node.fixtureKey);
     const art = beat?.art?.[panelId];
     if (!art) return undefined;

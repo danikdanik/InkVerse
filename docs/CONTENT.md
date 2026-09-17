@@ -15,12 +15,20 @@ root  (opening-trio, 3 panels; choices: gate, guardian; custom: /hold.*compass|.
 |
 |-- [gate] ------ gate-1 --g1-next--> gate-2 --g2-next--> gate-3 --g3-next--> gate-4
 |                 (archive clue)                                              |
-|                 addFacts: page "lost tomorrow"          g4-future (*fact)--+--> ending-repair-future
-|                                                         g4-sever ----------+--> ending-sever
+|                 addFacts: page "lost tomorrow"                     g4-descend
+|                                                                             v
+|                 gate-5 --g5-next--> gate-6 --g6-next--> gate-7
+|                 (tomorrow written    (archive erases   |
+|                  by an unseen hand)   today; map fades) g7-future (*fact)--+--> ending-repair-future
+|                                                         g7-sever ----------+--> ending-sever
 |
 |-- [guardian] -- guardian-1 --gd1-next--> guardian-2 --gd2-next--> guardian-3 --gd3-next--> guardian-4
 |                 (trust +1, listens)      (trust +1)                                        |
-|                 fact: visitor wore teal scarf = Neri                    gd4-past (#trust>=1)+--> ending-repair-past
+|                 fact: visitor wore teal scarf = Neri                                gd4-descend
+|                                                                                            v
+|                 guardian-5 --gd5-next--> guardian-6 --gd6-next--> guardian-7
+|                 (door's other face      (guardian forgets;   |
+|                  in 2nd timeline)         trust +1)           gd7-past (#trust>=1)+--> ending-repair-past
 |
 `-- (custom) ---- custom-compass-1 --cc-back--> custom-compass-2
                   hands compass to guardian; needle splits; exists in both timelines
@@ -29,21 +37,26 @@ Legend:  *fact  = choice requires the archived "lost tomorrow" fact
          #trust = choice requires guardian trust >= 1
 ```
 
-14 beats, 16 panels total. Every non-root, non-custom beat is reached by a choice id that exists in
-its parent's `choices`. Both route endings and the optional sever ending are reachable from `root`
-by following `via` edges (asserted by the validator).
+20 beats, 24 panels total. Each route now runs four middle beats (gate-4..gate-7,
+guardian-4..guardian-7) before its ending. Every non-root, non-custom beat is reached by a choice id
+that exists in its parent's `choices`. Both route endings and the optional sever ending are reachable
+from `root` by following `via` edges (asserted by the validator).
 
 ## The two routes and how knowledge matters
 
 - Gate route (repair the future): Neri crosses the cosmic gate into the floating archive, learns a
-  page of her own map is recorded as "lost tomorrow", follows the tear to the seam, and at `gate-4`
-  can only choose "Repair the future" if she carries that archived fact. Otherwise she can sever.
+  page of her own map is recorded as "lost tomorrow", follows the tear to the seam, descends to the
+  deeper shelf where tomorrow is written by an unseen hand (`gate-5`), watches the archive erase today
+  as her map fades (`gate-6`), and at `gate-7` can only choose "Repair the future" if she carries that
+  archived fact. Otherwise she can sever.
 - Guardian route (repair the past): Neri stays and listens; the guardian's trust rises (+1 at
-  `guardian-1`, +1 at `guardian-2`). It reveals the tomorrow-visitor wore Neri's teal scarf and was
-  Neri herself. The citadel is forgetting her. At `guardian-4`, entrusting a memory to make the
-  citadel remember her ("Repair the past") requires guardian trust >= 1, which only listening earns.
+  `guardian-1`, +1 at `guardian-2`, +1 again at `guardian-6`). It reveals the tomorrow-visitor wore
+  Neri's teal scarf and was Neri herself, shows the door's other (open) face in the second timeline
+  (`guardian-5`), then begins to forget her (`guardian-6`). At `guardian-7`, entrusting a memory to
+  make the citadel remember her ("Repair the past") requires guardian trust >= 1, which only listening
+  earns.
 
-So a route's discovered knowledge (archive fact vs guardian trust) gates the beat-4 payoff choice on
+So a route's discovered knowledge (archive fact vs guardian trust) gates the beat-7 payoff choice on
 that route. This is enforced through each choice's `requires` (facts or `minTrust`).
 
 ## Endings

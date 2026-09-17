@@ -535,6 +535,22 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
       const panel = parent.panels.find((p) => p.id === choice.hotspot.panelId);
       sketchKey = deriveSketchKey(choice.label, panel?.sketchKey);
       originatingChoice = { kind: 'preset' as const, choiceId: choice.id, label: choice.label };
+
+      // Revisit: a preset choice already taken from this parent returns the saved child, no new
+      // node and no billable jobs. Sibling branches only arise from different choices or custom text.
+      const existing = db
+        .listNodes(runId)
+        .filter((n) => n.parentId === parent.id && n.storyStatus === 'ready' && n.revisionOf === null)
+        .find((n) => n.originatingChoice.kind === 'preset' && n.originatingChoice.choiceId === choice.id);
+      if (existing) {
+        const opId = nanoid();
+        db.insertOperation({ runId, clientOpId: body.clientOpId, operationId: opId, nodeId: existing.id });
+        run.activeNodeId = existing.id;
+        run.updatedAt = nowIso();
+        db.updateRun(run);
+        hub.publish(runId, { type: 'cursor.moved', runId, nodeId: existing.id });
+        return reply.code(202).send({ operationId: opId, nodeId: existing.id, deduplicated: true });
+      }
     } else {
       const text = body.customAction!;
       sketchKey = deriveSketchKey(text);

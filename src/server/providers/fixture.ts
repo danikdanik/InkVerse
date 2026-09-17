@@ -32,13 +32,18 @@ export class FixtureStoryProvider implements StoryProvider {
     if (input.action.kind === 'preset') {
       const choiceId = input.action.choice.id;
       match = candidates.find((b) => b.via.kind === 'choice' && b.via.choiceId === choiceId);
+      // Demo replay: a preset choice without its own authored page continues the route instead of
+      // dead-ending on a generic placeholder. Only the authored text differs from the reader's exact pick.
+      if (!match) match = candidates.find((b) => b.via.kind === 'choice');
     } else if (input.action.kind === 'custom') {
       const text = input.action.customText;
       match = candidates.find((b) => b.via.kind === 'custom' && b.via.match.test(text));
     } else {
-      // revision: reuse the matching authored beat for the same label if present
-      const label = input.action.choiceLabel;
-      match = candidates.find((b) => b.via.kind === 'custom' && b.via.match.test(label));
+      // revision: replay the same authored page (same title) or a custom beat matching the label
+      const { previousTitle, choiceLabel } = input.action;
+      match =
+        this.episode.beats.find((b) => b.parentKey === parentKey && b.response.beat.title === previousTitle) ??
+        candidates.find((b) => b.via.kind === 'custom' && b.via.match.test(choiceLabel));
     }
 
     if (match) {
