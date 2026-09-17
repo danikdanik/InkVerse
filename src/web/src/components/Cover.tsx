@@ -4,6 +4,9 @@ import { loadSketches, sketchFor } from '../lib/sketches';
 
 const ISSUE_TITLE = 'Issue #1: The Citadel of Time and Space';
 
+/** Runware GPT Image 2.5 render of the opening scene, generated once and stored with the app. */
+const DEFAULT_COVER_URL = '/covers/citadel-cover.png';
+
 /** Opens directly on the comic cover. Continue appears when a saved run exists for this session. */
 export function Cover({ runs, coverUrl, onBegin, onContinue, onOpenArchive }: {
   runs: Run[];
@@ -20,8 +23,8 @@ export function Cover({ runs, coverUrl, onBegin, onContinue, onOpenArchive }: {
     <div className="min-h-full w-full flex items-center justify-center p-6" style={{ background: '#0b0a09' }}>
       <div className="w-full max-w-md paper rounded-xl shadow-2xl overflow-hidden border border-black/20">
         <div className="relative aspect-[3/4] w-full bg-black/80">
-          {coverUrl ? (
-            <img src={coverUrl} alt={`Cover of ${ISSUE_TITLE}`} className="w-full h-full object-cover" />
+          {(coverUrl ?? DEFAULT_COVER_URL) ? (
+            <img src={coverUrl ?? DEFAULT_COVER_URL} alt={`Cover of ${ISSUE_TITLE}`} className="w-full h-full object-cover" />
           ) : (
             <div className="absolute inset-0 grid place-items-center p-6">
               <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: citadel }} />

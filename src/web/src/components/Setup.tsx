@@ -53,7 +53,9 @@ export function Setup({ config, onCreate, onBack }: {
   onCreate: (runId: string) => void;
   onBack: () => void;
 }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  // Demo scope: only the Citadel issue is shown; the start picker and setup cards are skipped.
+  const CITADEL_ONLY = import.meta.env.VITE_CITADEL_ONLY !== '0';
+  const [step, setStep] = useState<1 | 2 | 3>(CITADEL_ONLY ? 3 : 1);
   const [art, setArt] = useState<Art | null>(null);
   const [starts, setStarts] = useState<StoryStartCard[] | null>(null);
   const [decks, setDecks] = useState<SetupDecks | null>(null);
@@ -83,6 +85,19 @@ export function Setup({ config, onCreate, onBack }: {
     void loadAllArt().then(setArt);
     void api.getStarts().then((l) => setStarts(l.length ? l : FALLBACK_STARTS)).catch(() => setStarts(FALLBACK_STARTS));
   }, []);
+
+  // Citadel-only demo: preselect the authored start so Begin works without visiting steps 1 and 2.
+  useEffect(() => {
+    if (!CITADEL_ONLY || !starts) return;
+    const c = starts.find((x) => x.id === 'citadel') ?? FALLBACK_STARTS[0];
+    setStartId('citadel');
+    setSetup((prev) => prev ?? startToSetup(c));
+  }, [starts]);
+
+  // Default to Live when the server has both keys, so the demo shows real Runware art.
+  useEffect(() => {
+    if (config?.liveAvailable) setMode('live');
+  }, [config?.liveAvailable]);
 
   function chooseStart(c: StoryStartCard) {
     setStartId(c.id);
@@ -163,14 +178,16 @@ export function Setup({ config, onCreate, onBack }: {
       <div className="mx-auto max-w-lg p-5">
         <div className="paper rounded-xl border border-black/20 p-5 space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl">{step === 1 ? 'Pick a story start' : step === 2 ? 'Your story setup' : 'Look and cast'}</h2>
-            <button onClick={step === 1 ? onBack : () => setStep((s) => (s === 3 ? 2 : 1))} className="text-sm underline focus-ring opacity-70">Back</button>
+            <h2 className="font-display text-2xl">{CITADEL_ONLY ? 'Issue #1: The Citadel of Time and Space' : step === 1 ? 'Pick a story start' : step === 2 ? 'Your story setup' : 'Look and cast'}</h2>
+            <button onClick={step === 1 || CITADEL_ONLY ? onBack : () => setStep((s) => (s === 3 ? 2 : 1))} className="text-sm underline focus-ring opacity-70">Back</button>
           </div>
-          <ol className="flex gap-2 text-xs" aria-label="Steps">
-            {[1, 2, 3].map((n) => (
-              <li key={n} className={`flex-1 h-1.5 rounded-full ${step >= n ? 'bg-accent' : 'bg-black/15'}`} />
-            ))}
-          </ol>
+          {!CITADEL_ONLY && (
+            <ol className="flex gap-2 text-xs" aria-label="Steps">
+              {[1, 2, 3].map((n) => (
+                <li key={n} className={`flex-1 h-1.5 rounded-full ${step >= n ? 'bg-accent' : 'bg-black/15'}`} />
+              ))}
+            </ol>
+          )}
 
           {step === 1 && (
             <Step1
@@ -220,14 +237,22 @@ export function Setup({ config, onCreate, onBack }: {
                     const s = STYLES[id];
                     return (
                       <button key={id} type="button" onClick={() => setStyleId(id)}
-                        className={`focus-ring text-left rounded-lg border p-3 ${styleId === id ? 'border-2' : 'border-black/20'}`}
+                        className={`focus-ring text-left rounded-lg border overflow-hidden ${styleId === id ? 'border-2' : 'border-black/20'}`}
                         style={styleId === id ? { borderColor: s.accent } : undefined}>
+                        {/* Same scene rendered by GPT Image 2.5 in each finish (src/web/public/styles). Rendered Ink has no sample and hides the frame. */}
+                        <div className="w-full bg-black/10" style={{ aspectRatio: '3 / 2' }}>
+                          <img src={`/styles/${id}.png`} alt={`${s.name} sample panel`} loading="lazy" decoding="async"
+                            className="w-full h-full object-cover block"
+                            onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }} />
+                        </div>
+                        <div className="p-3 pt-2">
                         <div className="flex items-center gap-2">
                           <span className="inline-block w-4 h-4 rounded-full" style={{ background: s.accent }} />
                           <span className="font-medium text-sm">{s.name}</span>
                         </div>
                         <p className="text-xs opacity-70 mt-1">{s.blurb}</p>
                         <p className="text-[11px] italic opacity-60 mt-1">Good for: {s.fit}</p>
+                        </div>
                       </button>
                     );
                   })}

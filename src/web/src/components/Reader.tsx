@@ -159,7 +159,7 @@ export function Reader({ ctrl, config, onExit }: {
                   const slot = slotFor(p.layoutSlot);
                   return (
                     <div key={p.id} style={{ gridColumn: slot.col, gridRow: slot.row }}>
-                      <Panel panel={p} best={ctrl.best[p.id]} aspect={aspectRatio(slot.aspect)} sketches={sketches}
+                      <Panel panel={p} best={ctrl.best[`${node.id}:${p.id}`]} aspect={aspectRatio(slot.aspect)} sketches={sketches}
                         assetUrl={ctrl.assetUrl} choices={node.choices.filter((c) => c.hotspot.panelId === p.id)}
                         motionOn={motionOn} ambient={ambient} disabled={disabled}
                         onChoose={(id) => submitChoice(id)} onCustom={(pid) => setCustomFor(pid)} onRetryArt={retryArt} />
@@ -171,7 +171,7 @@ export function Reader({ ctrl, config, onExit }: {
                 {node.panels.map((p) => {
                   const slot = slotFor(p.layoutSlot);
                   return (
-                    <Panel key={p.id} panel={p} best={ctrl.best[p.id]} aspect={aspectRatio(slot.aspect)} sketches={sketches}
+                    <Panel key={p.id} panel={p} best={ctrl.best[`${node.id}:${p.id}`]} aspect={aspectRatio(slot.aspect)} sketches={sketches}
                       assetUrl={ctrl.assetUrl} choices={node.choices.filter((c) => c.hotspot.panelId === p.id)}
                       motionOn={motionOn} ambient={ambient} disabled={disabled}
                       onChoose={(id) => submitChoice(id)} onCustom={(pid) => setCustomFor(pid)} onRetryArt={retryArt} />
