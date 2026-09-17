@@ -1,0 +1,11 @@
+node_modules
+dist
+data/*.sqlite*
+data/assets/*
+!data/assets/.gitkeep
+.env
+.env.*
+!.env.example
+.npm-cache
+.DS_Store
+.playwright-mcp

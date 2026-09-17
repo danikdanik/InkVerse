@@ -1,0 +1,49 @@
+{
+  "name": "inkverse",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "node --watch --import tsx src/server/index.ts",
+    "dev:web": "vite --config src/web/vite.config.ts",
+    "build:web": "vite build --config src/web/vite.config.ts",
+    "start": "NODE_ENV=production node --import tsx src/server/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "fixtures:build": "tsx scripts/build-fixtures.ts",
+    "probe": "tsx scripts/probe-providers.ts",
+    "fixtures:art": "tsx scripts/generate-fixture-art.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.126.0",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/multipart": "^10.1.1",
+    "@fastify/static": "^10.1.4",
+    "@hyperframes/player": "^0.8.46",
+    "@resvg/resvg-js": "^2.6.2",
+    "@runware/sdk-js": "^1.3.2",
+    "@xyflow/react": "^12.11.6",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.12.5",
+    "gsap": "^3.13.0",
+    "nanoid": "^5.1.6",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

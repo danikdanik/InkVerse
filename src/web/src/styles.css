@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/*
+  INKVERSE reader typography. Dark paper/ink palette driven by CSS vars set per style
+  (STYLES[styleId]). Display + hand-lettered feel from system fonts only, no external loads.
+*/
+:root {
+  --paper: #f4efe4;
+  --ink: #141210;
+  --accent: #2bb3c0;
+  --display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --letter: "Comic Sans MS", "Chalkboard SE", "Segoe Print", "Bradley Hand", ui-rounded, system-ui, sans-serif;
+  --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: #0b0a09;
+  color: var(--ink);
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display { font-family: var(--display); letter-spacing: 0.01em; }
+.font-letter { font-family: var(--letter); }
+
+.paper { background: var(--paper); color: var(--ink); }
+.ink { color: var(--ink); }
+.accent { color: var(--accent); }
+.bg-accent { background: var(--accent); }
+
+/* Focus rings for accessible choice buttons. */
+.focus-ring:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* ---- panel / motion plane ---- */
+.hf-plane { position: absolute; inset: 0; overflow: hidden; }
+.hf-cam-wrap { position: absolute; inset: 0; will-change: transform; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: ease-in-out; }
+.hf-wash { position: absolute; inset: 0; mix-blend-mode: soft-light; pointer-events: none; }
+.hf-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hf-p { position: absolute; border-radius: 9999px; animation-iteration-count: infinite; animation-timing-function: linear; }
+.hf-p-rain { border-radius: 1px; background: color-mix(in srgb, var(--accent) 55%, white); opacity: 0.5; }
+.hf-p-drifting_dust { background: color-mix(in srgb, var(--accent) 40%, white); opacity: 0.5; }
+.hf-p-energy_pulse { background: var(--accent); opacity: 0.6; box-shadow: 0 0 6px var(--accent); }
+
+@keyframes hf-cam {
+  from { transform: scale(var(--hf-zs, 1)) translate(0, 0); }
+  to   { transform: scale(var(--hf-ze, 1.03)) translate(var(--hf-px, 0), var(--hf-py, 0)); }
+}
+@keyframes hf-rain { from { transform: translateY(-12%); } to { transform: translateY(120%); } }
+@keyframes hf-dust { from { transform: translate(0, 0); opacity: 0.15; } 50% { opacity: 0.6; } to { transform: translate(6px, -10px); opacity: 0.15; } }
+@keyframes hf-pulse { 0%,100% { transform: scale(0.6); opacity: 0.2; } 50% { transform: scale(1.4); opacity: 0.75; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-cam-wrap { animation: none !important; }
+  .hf-p { animation: none !important; }
+}
+
+/* Stage layers cross-dissolve; frame/crop stay put. */
+.stage-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity 450ms ease; }
+.stage-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* thin scrollbars in drawers */
+.drawer-scroll { scrollbar-width: thin; }
+
+/* Compact choice pills, sized to their text, over the art. Accent border on hover/focus. */
+.choice-pill {
+  position: absolute;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--ink);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  color: var(--ink);
+  white-space: nowrap;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.choice-pill:hover, .choice-pill:focus-visible { border-color: var(--accent); }
+.choice-dot {
+  position: absolute;
+  width: 9px; height: 9px;
+  border-radius: 9999px;
+  background: var(--accent);
+  border: 1px solid rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
