@@ -87,7 +87,7 @@ async function main(): Promise<void> {
   log(`Run at ${new Date().toISOString()}`);
   log('');
 
-  const hasRunware = present('RUNWARE_API_KEY');
+  const hasRunware = present('RUNWARE_API_KEY') || present('RUNWARE_KEY');
   const anthropicKey = process.env.ANTHROPIC_API_KEY || process.env.FABLE_5_1_KEY;
   const hasAnthropic = Boolean(anthropicKey);
   log('## Keys present (names only)');
@@ -110,9 +110,9 @@ async function main(): Promise<void> {
       timeoutMs: 120_000,
       ...over,
     });
-    const schnell = createRunwareImageProvider({ apiKey: process.env.RUNWARE_API_KEY!, previewModel: MODEL_IDS.previewSchnell });
-    const klein = createRunwareImageProvider({ apiKey: process.env.RUNWARE_API_KEY!, previewModel: MODEL_IDS.previewKlein });
-    const flare = createRunwareImageProvider({ apiKey: process.env.RUNWARE_API_KEY!, finalModel: MODEL_IDS.finalFlare, defaultQuality: 'low' });
+    const schnell = createRunwareImageProvider({ apiKey: (process.env.RUNWARE_API_KEY ?? process.env.RUNWARE_KEY)!, previewModel: MODEL_IDS.previewSchnell });
+    const klein = createRunwareImageProvider({ apiKey: (process.env.RUNWARE_API_KEY ?? process.env.RUNWARE_KEY)!, previewModel: MODEL_IDS.previewKlein });
+    const flare = createRunwareImageProvider({ apiKey: (process.env.RUNWARE_API_KEY ?? process.env.RUNWARE_KEY)!, finalModel: MODEL_IDS.finalFlare, defaultQuality: 'low' });
 
     await imageProbe('flux-schnell-preview', schnell, baseReq({ stage: 'preview' }));
     await imageProbe('flux-klein-preview', klein, baseReq({ stage: 'preview' }));

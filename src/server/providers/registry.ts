@@ -32,6 +32,27 @@ function snap(n: number, step: number, min: number, max: number): number {
   const v = Math.round(n / step) * step;
   return Math.min(max, Math.max(min, v));
 }
+/**
+ * Scale a size up or down (keeping aspect) until width*height sits inside the model's pixel bounds.
+ * A 16:9 final at 1024x576 (589,824 px) is below gpt-image's 655,360 minimum and is rejected with
+ * `invalidPixels`; this lifts it to 1088x608 or larger. Rounds up so the result never dips under the minimum.
+ */
+function fitPixelBounds(size: { width: number; height: number }, step: number, minDim: number, maxDim: number, minPixels: number, maxPixels: number) {
+  let { width, height } = size;
+  const area = () => width * height;
+  for (let i = 0; i < 8 && area() < minPixels; i++) {
+    const k = Math.sqrt(minPixels / area()) * 1.02;
+    width = Math.min(maxDim, Math.ceil((width * k) / step) * step);
+    height = Math.min(maxDim, Math.ceil((height * k) / step) * step);
+  }
+  for (let i = 0; i < 8 && area() > maxPixels; i++) {
+    const k = Math.sqrt(maxPixels / area()) * 0.98;
+    width = Math.max(minDim, Math.floor((width * k) / step) * step);
+    height = Math.max(minDim, Math.floor((height * k) / step) * step);
+  }
+  return { width, height };
+}
+
 function sizeForAspect(aspect: Aspect, longEdge: number, step: number, min: number, max: number) {
   const r = aspectRatio(aspect);
   const w = r >= 1 ? longEdge : longEdge * r;
@@ -45,8 +66,16 @@ interface ModelMeta {
   step: number;
   minDim: number;
   maxDim: number;
+  /** Total pixel bounds enforced by the provider (gpt-image: 655,360 to 8,294,400; confirmed live). */
+  minPixels: number;
+  maxPixels: number;
   capability: ModelCapability;
 }
+
+const PIXEL_BOUNDS: Record<Family, { min: number; max: number }> = {
+  'gpt-image': { min: 655_360, max: 8_294_400 },
+  flux: { min: 0, max: Number.MAX_SAFE_INTEGER },
+};
 
 function buildMeta(
   model: string,
@@ -57,8 +86,9 @@ function buildMeta(
   maxDim: number,
   partial: Omit<ModelCapability, 'model' | 'sizes'>,
 ): ModelMeta {
-  const sizes = ASPECTS.map((a) => sizeForAspect(a, longEdge, step, minDim, maxDim));
-  return { family, longEdge, step, minDim, maxDim, capability: { model, sizes, ...partial } };
+  const bounds = PIXEL_BOUNDS[family];
+  const sizes = ASPECTS.map((a) => fitPixelBounds(sizeForAspect(a, longEdge, step, minDim, maxDim), step, minDim, maxDim, bounds.min, bounds.max));
+  return { family, longEdge, step, minDim, maxDim, minPixels: bounds.min, maxPixels: bounds.max, capability: { model, sizes, ...partial } };
 }
 
 // gpt-image 2.5: reference images (1-16), six quality tiers, no seed/negative/steps.
@@ -117,7 +147,8 @@ export function pickSize(model: string, aspect: Aspect): { width: number; height
 /** Snap arbitrary width/height to the model's dimension grid and bounds. */
 export function snapDims(model: string, width: number, height: number): { width: number; height: number } {
   const m = meta(model);
-  return { width: snap(width, m.step, m.minDim, m.maxDim), height: snap(height, m.step, m.minDim, m.maxDim) };
+  const snapped = { width: snap(width, m.step, m.minDim, m.maxDim), height: snap(height, m.step, m.minDim, m.maxDim) };
+  return fitPixelBounds(snapped, m.step, m.minDim, m.maxDim, m.minPixels, m.maxPixels);
 }
 
 /**

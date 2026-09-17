@@ -165,3 +165,20 @@ describe('proposeSetup / outlineEpisode prompt builders', () => {
     expect(msg).toContain('"protagonistName":"Alex"');
   });
 });
+
+import { snapDims as _snapDims, pickSize as _pickSize } from '../src/server/providers/registry';
+describe('gpt-image pixel-area bounds', () => {
+  it('lifts a 16:9 final above the 655,360 pixel minimum while keeping the aspect', () => {
+    const d = _snapDims('openai:gpt-image@2.5-flare', 1024, 576);
+    expect(d.width * d.height).toBeGreaterThanOrEqual(655_360);
+    expect(Math.abs(d.width / d.height - 16 / 9)).toBeLessThan(0.05);
+    expect(d.width % 16).toBe(0);
+  });
+  it('keeps every catalog size for the final model inside the bounds', () => {
+    for (const a of ['16:9', '4:3', '3:2', '1:1', '3:4', '2:3'] as const) {
+      const s = _pickSize('openai:gpt-image@2.5-flare', a);
+      expect(s.width * s.height).toBeGreaterThanOrEqual(655_360);
+      expect(s.width * s.height).toBeLessThanOrEqual(8_294_400);
+    }
+  });
+});

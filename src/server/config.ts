@@ -75,7 +75,7 @@ export function loadConfig(overrides: ConfigOverrides = {}): ServerConfig {
     keys: {
       // The user stores the Anthropic key as FABLE_5_1_KEY; accept either.
       anthropic: env.ANTHROPIC_API_KEY?.trim() || env.FABLE_5_1_KEY?.trim() || null,
-      runware: env.RUNWARE_API_KEY?.trim() || null,
+      runware: (env.RUNWARE_API_KEY ?? env.RUNWARE_KEY)?.trim() || null,
     },
   };
 }

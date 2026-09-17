@@ -94,6 +94,15 @@ export function createAnthropicStoryProvider(config: AnthropicConfig = {}): Stor
   const model = config.model ?? DEFAULT_MODEL;
   const maxTokens = config.maxTokens ?? 4096;
 
+  /**
+   * Strict json_schema output is preferred. The API rejects grammars it considers too large
+   * (seen live: "The compiled grammar is too large"). When that happens we fall back to plain
+   * JSON-only output for the rest of this provider's life; the server still validates with Zod
+   * and allows one repair attempt, which is the documented degradation path.
+   */
+  let strictOutputSupported = true;
+  const JSON_ONLY_HINT = '\n\nRespond with a single JSON object that matches the schema in the system prompt. No prose, no code fences.';
+
   async function createMessage(
     system: string,
     userMessage: string,
@@ -101,14 +110,28 @@ export function createAnthropicStoryProvider(config: AnthropicConfig = {}): Stor
     schema: { [key: string]: unknown },
     signal?: AbortSignal,
   ): Promise<Anthropic.Beta.Messages.BetaMessage> {
-    const body: Anthropic.Beta.Messages.MessageCreateParamsNonStreaming = {
+    const build = (strict: boolean): Anthropic.Beta.Messages.MessageCreateParamsNonStreaming => ({
       model,
       max_tokens: maxTokens,
       system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
-      messages: [{ role: 'user', content: userMessage }],
-      output_config: { effort, format: { type: 'json_schema', schema } },
-    };
-    return client.beta.messages.create(body, { signal });
+      messages: [{ role: 'user', content: strict ? userMessage : userMessage + JSON_ONLY_HINT }],
+      output_config: strict ? { effort, format: { type: 'json_schema', schema } } : { effort },
+    });
+    if (strictOutputSupported) {
+      try {
+        return await client.beta.messages.create(build(true), { signal });
+      } catch (err) {
+        const e = err as { status?: number; message?: string };
+        const msg = String(e?.message ?? '');
+        if (e?.status === 400 && /grammar|schema|output_config\.format/i.test(msg)) {
+          console.warn('[anthropic] strict json_schema output rejected, falling back to JSON-only prompting:', msg.slice(0, 160));
+          strictOutputSupported = false;
+        } else {
+          throw err;
+        }
+      }
+    }
+    return client.beta.messages.create(build(false), { signal });
   }
 
   /** One call, plus one bounded repair attempt if the parsed JSON fails validation. */

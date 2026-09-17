@@ -119,7 +119,8 @@ export function createRunwareImageProvider(config: RunwareConfig): ImageProvider
       const arr = Buffer.from(await res.arrayBuffer());
       return { bytes: arr, mime: res.headers.get('content-type') ?? 'image/png' };
     }
-    throw new Error('Runware returned no image data');
+    const e = (img as unknown as { error?: { message?: string }; errorMessage?: string });
+    throw new Error(e.error?.message ?? e.errorMessage ?? 'Runware returned no image data');
   }
 
   async function lookupByTaskUUID(taskUUID: string): Promise<ITextToImage | null> {
@@ -158,6 +159,11 @@ export function createRunwareImageProvider(config: RunwareConfig): ImageProvider
     try {
       results = await Promise.race([c.imageInference(params), timeout, abort]);
     } catch (err) {
+      // Runware rejections arrive as { error: { code, message, parameter } } objects, not Error instances.
+      const rwErr = (err as { error?: { code?: string; message?: string; parameter?: string } })?.error;
+      if (rwErr?.message) {
+        throw new Error(`Runware ${rwErr.code ?? 'error'}: ${rwErr.message}${rwErr.parameter ? ` (${rwErr.parameter})` : ''}`);
+      }
       // Ambiguous timeout/abort: the task may have completed. Recover by uuid to
       // avoid a duplicate charge on the caller's retry.
       const recovered = await lookupByTaskUUID(customTaskUUID);

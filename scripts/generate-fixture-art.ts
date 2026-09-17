@@ -75,7 +75,7 @@ function inlineBrief(bible: any, panel: any, style: any): string {
 
 async function main(): Promise<void> {
   const args = parseArgs();
-  const apiKey = process.env.RUNWARE_API_KEY;
+  const apiKey = process.env.RUNWARE_API_KEY ?? process.env.RUNWARE_KEY;
   if (!apiKey) {
     console.error('fixtures:art needs RUNWARE_API_KEY (loaded from .env). A human must run: npm run fixtures:art');
     process.exit(1);
@@ -182,7 +182,12 @@ async function main(): Promise<void> {
   console.log(`\nApprox spent: $${spent.toFixed(4)}`);
 }
 
-main().catch((err) => {
-  console.error('fixtures:art failed:', (err as Error).message);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    // The Runware SDK keeps its websocket open; exit explicitly so the script does not hang after finishing.
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('fixtures:art failed:', (err as Error).message);
+    process.exit(1);
+  });

@@ -31,9 +31,15 @@ async function tryLoadAnthropic(config: ServerConfig): Promise<StoryProvider | n
   try {
     const spec = './anthropic';
     const mod: any = await import(spec);
-    const provider = mod.createAnthropicStoryProvider?.(config);
+    // Adapter factories take their own narrow config, not the whole ServerConfig.
+    const provider = mod.createAnthropicStoryProvider?.({
+      apiKey: config.keys.anthropic ?? undefined,
+      model: config.models.story,
+      timeoutMs: config.timeouts.storyMs,
+    });
     return provider ?? null;
-  } catch {
+  } catch (err) {
+    console.warn('[providers] anthropic adapter unavailable:', (err as Error)?.message);
     return null;
   }
 }
@@ -42,9 +48,15 @@ async function tryLoadRunware(config: ServerConfig): Promise<ImageProvider | nul
   try {
     const spec = './runware';
     const mod: any = await import(spec);
-    const provider = mod.createRunwareImageProvider?.(config);
+    const provider = mod.createRunwareImageProvider?.({
+      apiKey: config.keys.runware,
+      previewModel: config.models.preview,
+      finalModel: config.models.final,
+      timeoutMs: config.timeouts.imageMs,
+    });
     return provider ?? null;
-  } catch {
+  } catch (err) {
+    console.warn('[providers] runware adapter unavailable:', (err as Error)?.message);
     return null;
   }
 }
@@ -99,7 +111,7 @@ export async function chooseProviders(
 export function describeProviderSetup(config: ServerConfig): string | null {
   const missing: string[] = [];
   if (!config.keys.anthropic) missing.push('ANTHROPIC_API_KEY or FABLE_5_1_KEY (live story)');
-  if (!config.keys.runware) missing.push('RUNWARE_API_KEY (live artwork)');
+  if (!config.keys.runware) missing.push('RUNWARE_API_KEY or RUNWARE_KEY (live artwork)');
   if (missing.length === 0) return null;
   return `Add ${missing.join(' and ')} to your .env to enable live generation. Without it the app replays authored fixtures.`;
 }
